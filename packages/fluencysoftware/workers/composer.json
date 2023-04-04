@@ -1,0 +1,11 @@
+{
+    "name": "fluencysoftware/workers",
+    "description": "Import Workers",
+    "authors": [
+        {
+            "name": "Laz iMac Account",
+            "email": "lazarusm@gmail.com"
+        }
+    ],
+    "require": {}
+}

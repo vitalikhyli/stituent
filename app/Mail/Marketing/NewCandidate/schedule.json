@@ -1,0 +1,7 @@
+{
+
+    "1" : {"mailable" : "IntroEmail", "wait" : "21"},
+    "2" : {"mailable" : "FollowUp", "wait" : "30"},
+    "3" : {"mailable" : "PhoneBank", "wait" : "30"}
+
+}

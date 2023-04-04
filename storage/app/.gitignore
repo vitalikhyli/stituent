@@ -1,0 +1,6 @@
+*
+!public/
+!csvs/
+!user_exports/
+!master-voter-uploads/
+!.gitignore

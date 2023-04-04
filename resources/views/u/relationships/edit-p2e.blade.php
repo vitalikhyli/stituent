@@ -1,0 +1,269 @@
+@extends('u.base')
+<?php if (!defined('dir')) define('dir','/u'); ?>
+
+@section('title')
+  {{ $person->name }} Relationship
+@endsection
+
+@section('breadcrumb')
+
+    <a href="/u">Home</a> 
+  > <a href="/u/entities">Organizations</a> 
+  > <a href="/u/entities/{{ $person->id }}">{{ $person->name }}</a> 
+  > <b>Relationship</b>
+
+@endsection
+
+@section('style')
+
+	<style>
+
+	</style>
+
+@endsection
+
+@section('main')
+
+@include('elements.errors')
+
+
+<form method="POST" 
+  @if($mode == 'save')
+    action="{{dir}}/relationships/{{ $person->id }}/save/p2e"
+  @endif
+  @if($mode == 'update')
+    action="{{dir}}/relationships/{{ $relationship->id }}/update"
+  @endif
+>
+  @csrf
+
+
+    
+<div class="text-2xl font-sans border-b-4 border-blue pb-2">
+
+    <div class="float-right text-base">
+
+      <input type="submit" name="update" value="Save" class="rounded-lg px-4 py-2 bg-blue text-white text-center"/>
+
+      @if($mode == 'save')
+        <a href="{{dir}}/constituents/{{ $person->id }}">
+          <button type="button" class="rounded-lg px-4 py-2 border bg-black text-white text-center ml-2"/>
+            Cancel
+          </button>
+        </a>
+      @endif
+
+      @if($mode == 'update')
+        <input autocomplete="off" type="submit" formaction="{{dir}}/relationships/{{ $relationship->id }}/update/close" name="update" value="Save and Close" class="rounded-lg px-4 py-2 bg-grey-darkest text-white text-center"/>
+      @endif
+
+    </div>
+
+    @if($mode == 'save')
+	     <i class="fas fa-flag mr-2"></i>Create Relationship
+    @endif
+
+    @if($mode == 'update')
+           <i class="fas fa-flag mr-2"></i>Edit Relationship
+    @endif
+
+</div>
+
+
+
+<table class="w-full">
+
+  <tr class="border-b">
+    <td class="bg-grey-lighter p-2 font-bold" colspan="3">
+        {{ $person->full_name }} is...
+    </td>
+  </tr>
+
+  <tr class="">
+    <td class="p-2 pt-4">
+      <div class="flex-shrink">
+
+          <input type="text" id="kind_name" name="kind" class="text-blue-darker border w-full rounded-lg p-2 w-full font-bold" placeholder="Name of Relationship" 
+            @if($errors->any())
+                value="{{ old('kind') }}"
+            @else
+              @if(isset($relationship))
+                  value="{{ $relationship->kind }}"
+              @endif
+            @endif
+          />
+
+      </div>
+    </td>
+    <td class="p-2 pt-4 text-center">
+      at
+    </td>
+    <td class="p-2 pt-4 w-1/2">
+      <div class="flex-shrink">
+
+          <input type="text" id="object_entity_name" class="text-blue-darker border font-bold p-2 rounded-lg w-full" placeholder="Organization" 
+            @if(isset($object))
+                value="{{ $object->name }}"
+            @endif
+          />
+
+          <input type="text" id="object_entity_id" name="object_id" class="hidden" 
+            @if(isset($relationship))
+                value="{{ $relationship->object_id }}"
+            @endif
+          />
+
+      </div>
+    </td>
+  </tr>
+
+
+
+
+  <tr class="border-b">
+
+    <td class="p-2 align-top">
+      <div class="flex-shrink">
+             
+
+      </div>
+    </td>
+
+    <td class="p-2 align-top">
+
+      <!-- Spacer -->
+
+    </td>
+
+    <td class="p-2 align-top">
+
+      <span id="object_entity_noneselected" class="hidden rounded bg-blue text-white text-xs px-2 py-1 mb-4">None selected</span>
+
+    </td>
+    
+  </tr>
+
+
+  <tr class="">
+
+    <td class="p-2 align-top">
+      <div class="flex-shrink">
+             
+          <div id="list-kinds" class="flex-shrink"></div>
+
+      </div>
+    </td>
+
+    <td class="p-2 align-top">
+
+      <!-- Spacer -->
+
+    </td>
+
+    <td class="p-2 align-top">
+
+      <div id="list" class="flex-shrink"></div>
+
+    </td>
+
+  </tr>
+
+ 
+
+</table>
+
+</form>
+
+@if(isset($relationship))
+  <div class="float-left pt-2 text-sm">
+
+      <a href="{{dir}}/relationships/{{ $relationship->id }}/delete">
+        <button type="button" name="update" class="rounded-lg px-4 py-2 border bg-grey-darkest hover:bg-black text-white text-center ml-2"/>
+          <i class="fas fa-exclamation-triangle mr-2"></i> Delete Relationship
+        </button>
+      </a>
+
+  </div>
+@endif
+
+@endsection
+
+@section('javascript')
+
+<script type="text/javascript">
+
+  function getSearchData_Entities(v) {
+    if (v == '') {
+      $('#list').addClass('hidden');
+    }
+    $.get('{{dir}}/relationships/search_entities/'+v, function(response) {
+      if (response == '') {
+        $('#list').addClass('hidden');
+      } else {
+        $('#list').html(response);
+        $('#list').removeClass('hidden');
+      }
+    });
+  }
+
+  function getSearchData_Kinds(v) {
+    if (v == '') {
+      $('#list-kinds').addClass('hidden');
+    }
+    $.get('{{dir}}/relationships/search_kinds/p2e/'+v, function(response) {
+      if (response == '') {
+        $('#list-kinds').addClass('hidden');
+      } else {
+        $('#list-kinds').html(response);
+        $('#list-kinds').removeClass('hidden');
+      }
+    });
+  }
+
+  $(document).ready(function() {
+
+      $("#object_entity_name").focusout(function(){
+        window.setTimeout(function() {$('#list').addClass('hidden'); }, 300);
+      });
+      
+      $("#object_entity_name").keyup(function(){
+        $("#object_entity_id").val(null);
+        $("#object_entity_noneselected").removeClass('hidden');
+        $("#object_entity_name").removeClass('bg-orange-lightest');
+        getSearchData_Entities(this.value);
+      });
+
+      $(document).on('click', ".clickable-entity", function () {
+        id = $(this).data("theid");
+        name = $(this).data("thename");
+        $("#object_entity_noneselected").addClass('hidden');
+        $("#object_entity_name").addClass('bg-orange-lightest');
+        $("#object_entity_name").val(name);
+        $("#object_entity_id").val(id);
+      });
+
+
+      $("#kind_name").focusout(function(){
+        if ($("#kind_name").val() != '') {
+          $("#kind_name").addClass('bg-orange-lightest');
+        } else {
+          $("#kind_name").removeClass('bg-orange-lightest');
+        }
+        window.setTimeout(function() {$('#list-kinds').addClass('hidden'); }, 300);
+      });
+      
+      $("#kind_name").keyup(function(){
+        getSearchData_Kinds(this.value);
+      });
+
+      $(document).on('click', ".clickable-kind", function () {
+        name = $(this).find('.thename').html().trim();
+        $("#kind_name").val(name);
+      });
+
+
+  });
+
+</script>
+
+@endsection
